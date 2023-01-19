@@ -5,6 +5,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
 import com.dolphweb.flightapp.entity.Flight;
+import com.dolphweb.flightapp.entity.Passanger;
 
 public class FlightUpdateDAO {
 	private int code;
@@ -17,6 +18,7 @@ public class FlightUpdateDAO {
 		SessionFactory factory=new Configuration()
 							.configure("hibernate.cfg.xml")
 							.addAnnotatedClass(Flight.class)
+							.addAnnotatedClass(Passanger.class)
 							.buildSessionFactory();
 		
 		Session session = factory.getCurrentSession();
@@ -59,6 +61,7 @@ public class FlightUpdateDAO {
 		SessionFactory factory=new Configuration()
 				.configure("hibernate.cfg.xml")
 				.addAnnotatedClass(Flight.class)
+				.addAnnotatedClass(Passanger.class)
 				.buildSessionFactory();
 
 		Session session = factory.getCurrentSession();

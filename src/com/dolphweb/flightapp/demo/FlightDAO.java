@@ -8,6 +8,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
 import com.dolphweb.flightapp.entity.Flight;
+import com.dolphweb.flightapp.entity.Passanger;
 
 public class FlightDAO {
 
@@ -16,7 +17,7 @@ public class FlightDAO {
 	private Scanner scan;
 
 	public FlightDAO() {
-		this.factory = new Configuration().configure("hibernate.cfg.xml").addAnnotatedClass(Flight.class)
+		this.factory = new Configuration().configure("hibernate.cfg.xml").addAnnotatedClass(Flight.class).addAnnotatedClass(Passanger.class)
 				.buildSessionFactory();
 		this.scan = new Scanner(System.in);
 	}
@@ -99,7 +100,10 @@ public class FlightDAO {
 		if (f.getPassengerNumber() + passNumber > f.getCapacity()) {
 			System.out.println("Nema mesta u avionu!");
 		} else {
+			PassangerDAO passangerDB = new PassangerDAO();
 			f.setPassengerNumber(f.getPassengerNumber() + passNumber);
+			passangerDB.addPassangers(passNumber, f);
+			
 		}
 
 		session.getTransaction().commit();
@@ -107,36 +111,27 @@ public class FlightDAO {
 	}
 
 	public void removePassenger() {
-		System.out.println("Unesite registarski kod leta: ");
-		int code = Integer.valueOf(scan.nextLine());
+		Flight f = this.codeSearch();
+		System.out.println(f.getPassangers());
+		if (f == null) {
+			System.out.println("Neispravan kod leta!");
+			return;
+		}
 
 		System.out.println("Unesite broj putnika koje zelite da obrisete: ");
 		int passNumber = Integer.valueOf(scan.nextLine());
-
-		this.session = factory.getCurrentSession();
-
-		this.session.beginTransaction();
-
-		List<Flight> lista = session.createQuery("from Flight f where f.code=" + code).getResultList();
-
-		if (lista.isEmpty()) {
-			System.out.println("Nema rezultata za dati kod!");
-		} else {
-			Flight f = lista.get(0);
-			if (f.getPassengerNumber() - passNumber < 0) {
-				f.setPassengerNumber(0);
-			} else {
-				f.setPassengerNumber(f.getPassengerNumber() - passNumber);
-			}
-		}
-
+		
+		PassangerDAO passangerDB = new PassangerDAO();
+		passangerDB.removePassangers(passNumber, f);
+		
 		session.getTransaction().commit();
+
 	}
 
 	public void searchFligts() {
 		System.out.println("Izbor pretrage: ");
 		System.out.println(
-				"1.Pretraga po kodu leta\n2.Pretraga po kompaniji\n3.Pretraga po polaznom aerodromu\n4.Pretraga po dolaznom aerodromu\n5.Ispis svih letova");
+				"1.Pretraga po kodu leta\n2.Pretraga po kompaniji\n3.Pretraga po polaznom aerodromu\n4.Pretraga po dolaznom aerodromu\n5.Ispis svih letova\n6.Ispis svih putnika na letu");
 
 		String choice = scan.nextLine();
 
@@ -152,6 +147,7 @@ public class FlightDAO {
 				System.out.println("\nRezultat pretrage: ");
 				System.out.println(f + "\n");
 			}
+			this.session.getTransaction().commit();
 			break;
 		case "2":
 			companySearch();
@@ -165,7 +161,14 @@ public class FlightDAO {
 		case "5":
 			printAllFlights();
 			break;
+		case "6":
+			Flight f1 = codeSearch();
+			if(f1 != null) {
+				System.out.println(f1.getPassangers());
+			}
+			this.session.getTransaction().commit();
 		}
+
 
 	}
 
@@ -256,7 +259,7 @@ public class FlightDAO {
 
 		if (lista.isEmpty()) {
 			System.out.println("Nema rezultata za dati kod!\n");
-			this.session.getTransaction().commit();
+			//this.session.getTransaction().commit();
 			return null;
 		} else {
 			Flight f = lista.get(0);

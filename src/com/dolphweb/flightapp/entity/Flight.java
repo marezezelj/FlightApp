@@ -1,10 +1,16 @@
 package com.dolphweb.flightapp.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -33,6 +39,9 @@ public class Flight {
 	
 	@Column(name="passengers")
 	private int passengerNumber;
+	
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="flight", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+	private List<Passanger> passangers;
 	
 	public Flight() {
 		
@@ -108,7 +117,22 @@ public class Flight {
 				+ ", destinationCity=" + destinationCity + ", capacity=" + capacity + ", passengerNumber="
 				+ passengerNumber + "]";
 	}
+
+	public List<Passanger> getPassangers() {
+		return passangers;
+	}
+
+	public void setPassangers(List<Passanger> passangers) {
+		this.passangers = passangers;
+	}
 	
+	public void addPassanger(Passanger p) {
+		if (this.passangers==null) {
+			this.passangers=new ArrayList<>();
+		}
+		
+		this.passangers.add(p);
+	}
 	
 	
 }
